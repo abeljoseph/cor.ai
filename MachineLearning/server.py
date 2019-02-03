@@ -48,4 +48,6 @@ def getFitbitData():    # We need: minsExercise, palpitations, avgHeartrate
     heartRate = str(data['summary']['avgHeartRate'])
     heartPalpitations = str(data['summary']['heartPalpitations'])
 
-    return (minsExercise, heartRate, heartPalpitations)    
+    mystring = minsExercise + "," + heartRate + "," + heartPalpitations
+
+    return mystring
