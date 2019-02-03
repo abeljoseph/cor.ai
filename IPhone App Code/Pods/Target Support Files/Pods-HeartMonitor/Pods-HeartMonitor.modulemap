@@ -1,0 +1,6 @@
+framework module Pods_HeartMonitor {
+  umbrella header "Pods-HeartMonitor-umbrella.h"
+
+  export *
+  module * { export * }
+}
