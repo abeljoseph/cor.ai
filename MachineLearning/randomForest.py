@@ -23,24 +23,75 @@ def prdict_date(algo_name,X_train,y_train,X_test,y_test,atype='',verbose=0):
         print("acc test: "+ str(acc_val))
     else:
         return Y_pred
-df = pd.read_csv('patientData.csv')
-cat_vars = ['SEX','FAMILYHISTORY','SMOKERLAST5YRS'] #dummy variables
-data = df
-for var in cat_vars:
-    cat_list = 'var'+'_'+var
-    cat_list = pd.get_dummies(data[var],prefix=var)
-    data2 = data.join(cat_list)
-    data = data2
-cat_vars = ['SEX','FAMILYHISTORY','SMOKERLAST5YRS']
-data_vars= data.columns.values.tolist()
-to_keep = [i for i in data_vars if i not in cat_vars]
+def tester():   
+    df = pd.read_csv('patientData.csv')
+    cat_vars = ['SEX','FAMILYHISTORY','SMOKERLAST5YRS'] #dummy variables
+    data = df
+    for var in cat_vars:
+        cat_list = 'var'+'_'+var
+        cat_list = pd.get_dummies(data[var],prefix=var)
+        data2 = data.join(cat_list)
+        data = data2
+    cat_vars = ['SEX','FAMILYHISTORY','SMOKERLAST5YRS']
+    data_vars= data.columns.values.tolist()
+    to_keep = [i for i in data_vars if i not in cat_vars]
+    dataFinal = data[to_keep]
+    X = dataFinal.loc[:,dataFinal.columns != 'HEARTFAILURE']
+    y = dataFinal.loc[:,dataFinal.columns == 'HEARTFAILURE']
+    X_train,X_test,y_train,y_test = train_test_split(X,y,test_size =0.10,random_state =0)
+    random_forest = RandomForestClassifier(n_estimators=50, random_state = 0)
+    return prdict_date(random_forest,X_train,y_train,X_test,y_test,1)
 
-dataFinal = data[to_keep]
-
-
-X = dataFinal.loc[:,dataFinal.columns != 'HEARTFAILURE']
-y = dataFinal.loc[:,dataFinal.columns == 'HEARTFAILURE']
-
-X_train,X_test,y_train,y_test = train_test_split(X,y,test_size =0.20,random_state =0)
-random_forest = RandomForestClassifier(n_estimators=50, random_state = 0)
-answer = prdict_date(random_forest,X_train,y_train,X_test,y_test)
+def MLmodule(d):
+    pal = d['palpitations']
+    bmi = d['bmi']
+    bpm = d['heartbeat']
+    age = d['age']
+    sexF = 1
+    sexM = 0
+    if (d["sex"] or d['sex'] =="True"):
+        sexM,sexF = sexF,sexM
+    activity = d['exercise']
+    famN  = 1
+    famY = 0
+    if (d['family-history'] or d['family-history'] =="True"):
+        famN,famY = famY,famN
+    smokeN = 1
+    smokeY = 0
+    cho = d['cholesterol']
+    if (d['smoker'] or d['smoker'] =="True"):
+        smokeN,smokeY = smokeY,smokeN
+    x = pd.DataFrame({'PALPITATIONSPERDAY':[pal],'BMI':[bmi],'CHOLESTEROL':[cho],
+                      'AVGHEARTBEATSPERMIN':[bpm],'AGE':[age],
+                      'EXERCISEMINPERWEEK':[activity], 'SEX_F':[sexF],
+                      'SEX_M':[sexM],'FAMILYHISTORY_N':[famN],
+                      'FAMILYHISTORY_Y':[famY],'SMOKERLAST5YRS_N':[smokeN],
+                      'SMOKERLAST5YRS_Y':[smokeY]})
+    return (forest(x)[0]==1)
+def forest(x):
+    
+    
+    
+    df = pd.read_csv('patientTraining.csv')
+    cat_vars = ['SEX','FAMILYHISTORY','SMOKERLAST5YRS'] #dummy variables
+    data = df
+    for var in cat_vars:
+        cat_list = 'var'+'_'+var
+        cat_list = pd.get_dummies(data[var],prefix=var)
+        data2 = data.join(cat_list)
+        data = data2
+    cat_vars = ['SEX','FAMILYHISTORY','SMOKERLAST5YRS']
+    data_vars= data.columns.values.tolist()
+    to_keep = [i for i in data_vars if i not in cat_vars]
+    
+    dataFinal = data[to_keep]
+    
+    
+    X = dataFinal.loc[:,dataFinal.columns != 'HEARTFAILURE']
+    y = dataFinal.loc[:,dataFinal.columns == 'HEARTFAILURE']
+    
+    
+    
+    #X_train,X_test,y_train,y_test = train_test_split(X,y,test_size =0.10,random_state =0)
+    random_forest = RandomForestClassifier(n_estimators=50, random_state = 0)
+    return prdict_date(random_forest,X,y,x,[1],verbose = 1)
