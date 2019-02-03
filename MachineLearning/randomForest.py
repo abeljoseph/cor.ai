@@ -45,7 +45,7 @@ def tester():
 def MLmodule(d):
     pal = d['palpitations']
     bmi = d['bmi']
-    bpm = d['heartbeat']
+    bpm = d['heartRate']
     age = d['age']
     sexF = 1
     sexM = 0
